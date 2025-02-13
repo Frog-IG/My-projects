@@ -1,0 +1,136 @@
+#include <iostream>
+#include <vector>
+#include <string>
+#include <fstream>
+#include <chrono>
+using namespace std;
+class big_numbers
+{
+public:
+
+    vector<unsigned int> save;
+
+    big_numbers(string s)
+    {
+        reverse(s.begin(), s.end());
+        while (s.size() > 0)
+        {
+            save.push_back(stoi(s.substr(0, 9)));
+            if (s.size() >= 9)
+            {
+                s = s.substr(9);
+            }
+            else
+            {
+                s = "";
+            }
+                
+        }
+
+    }
+
+    big_numbers operator+(big_numbers& y)
+    {
+        big_numbers newNumbers("");
+        newNumbers.save.assign(max(save.size(), y.save.size()), 0);
+        long long carry = 0;
+        for (unsigned int i = 0; i < min(save.size(), y.save.size()); i++)
+        {
+            long long sum = long long (save[i]) + long long (y.save[i]) + carry;
+                      
+            carry = sum / 1000000000;
+            sum = sum % 1000000000;
+            newNumbers.save[i] = sum;
+        }
+
+        for (unsigned int i = y.save.size(); i < save.size(); i++)
+        {
+            long long sum = long long(save[i]) + carry;
+
+            carry = sum / 1000000000;
+            sum = sum % 1000000000;
+            newNumbers.save[i] = sum;
+        }
+
+        for (unsigned int i = save.size(); i < y.save.size(); i++)
+        {
+            long long sum = long long(y.save[i]) + carry;
+
+            carry = sum / 1000000000;
+            sum = sum % 1000000000;
+            newNumbers.save[i] = sum;
+        }
+        if (carry > 0)
+        {
+            newNumbers.save.push_back(carry);
+        }
+        return newNumbers;
+        
+    }
+
+    big_numbers operator*(big_numbers& y)
+    {
+        long long carry = 0;
+        big_numbers z ("");
+        z.save.assign(save.size() + y.save.size(), 0);
+        for (int i = 0; i < save.size(); i++)
+        {
+            for (int j = 0; j < y.save.size(); j++)
+            {
+                long long res = long long (save[i]) * long long (save[j]);
+                carry = res / 1000000000;
+                res = res % 1000000000;
+                z.save[i + j] += res;
+                z.save[i + j + 1] += carry;
+            }
+        }
+        while(z.save.back() == 0)
+        {
+            z.save.pop_back();
+        }
+        return z;
+    }
+
+};
+
+ostream& operator<<(ostream& out, big_numbers big)
+{
+    out << big.save.back();
+    for (int i = big.save.size()-2; i >= 0; i--)
+    {
+        
+        string s = to_string(big.save[i]);
+        while (s.size() < 10)
+        {
+            s = "0" + s;
+        }
+        out << s; 
+    }
+    
+    return out;
+}
+void main()
+{   
+    auto start = chrono::steady_clock::now();
+    big_numbers x1("");
+    big_numbers x2("");
+    for (int i = 0; i < 9898; i++)  // how many times multiplies
+    {
+        x1.save.push_back(i);
+        x2.save.push_back(i);
+    }
+    big_numbers x3 = x1 * x2;
+    ofstream f("1.txt");      // change "1" to your file (where you will see your bing number) name
+    f << x3 << endl;
+    f << endl;
+    f << endl;
+    f << endl;
+    f << endl;
+    f << x3.save.size()*10;
+    auto end = std::chrono::steady_clock::now();
+
+    chrono::duration<double> elapsed = end - start;
+    cout << "\n"
+        << "Time: " << elapsed.count() << " seconds\n";
+    cout << "done" << endl;
+}
