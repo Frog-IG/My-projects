@@ -1,1 +1,1 @@
-In main you can see class "Big_numbers"
+Library with big_numbers class.
